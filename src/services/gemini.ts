@@ -1,0 +1,91 @@
+import { GoogleGenAI } from "@google/genai";
+import { PROMPTS } from './prompts';
+import { Language, AnalysisResult, PairAnalysisResult } from '../types';
+
+// Initialize Gemini Client
+// Note: In a real production app, we might want to proxy this through a backend
+// to keep the API key secure, but for this requested architecture, we use client-side.
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+const MODEL_VISION = 'gemini-2.5-flash-image'; // Optimized for vision
+const MODEL_TEXT = 'gemini-3.1-pro-preview'; // Optimized for complex reasoning
+
+export const GeminiService = {
+  async analyzeChart(imageBase64: string, lang: Language): Promise<AnalysisResult> {
+    try {
+      const prompt = PROMPTS.chartAnalysis(lang);
+      
+      // Remove header if present (data:image/png;base64,)
+      const cleanBase64 = imageBase64.split(',')[1] || imageBase64;
+
+      const response = await ai.models.generateContent({
+        model: MODEL_VISION,
+        contents: {
+          parts: [
+            { inlineData: { mimeType: 'image/png', data: cleanBase64 } },
+            { text: prompt }
+          ]
+        },
+        config: {
+          responseMimeType: 'application/json',
+        }
+      });
+
+      const text = response.text;
+      if (!text) throw new Error('No response from Gemini');
+      
+      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+      return JSON.parse(cleanText) as AnalysisResult;
+    } catch (error) {
+      console.error('Gemini Vision Error:', error);
+      throw error;
+    }
+  },
+
+  async analyzePair(symbol: string, lang: Language): Promise<PairAnalysisResult> {
+    try {
+      const prompt = PROMPTS.pairAnalysis(symbol, lang);
+      
+      const response = await ai.models.generateContent({
+        model: MODEL_TEXT,
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          tools: [{ googleSearch: {} }], // Enable live search grounding
+        }
+      });
+
+      const text = response.text;
+      if (!text) throw new Error('No response from Gemini');
+
+      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+      return JSON.parse(cleanText) as PairAnalysisResult;
+    } catch (error) {
+      console.error('Gemini Text Error:', error);
+      throw error;
+    }
+  },
+
+  async explainPattern(pattern: string, lang: Language): Promise<any> {
+    try {
+      const prompt = PROMPTS.candlestickExplain(pattern, lang);
+      
+      const response = await ai.models.generateContent({
+        model: MODEL_TEXT,
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+        }
+      });
+
+      const text = response.text;
+      if (!text) throw new Error('No response from Gemini');
+
+      const cleanText = text.replace(/```json\n?|\n?```/g, '').trim();
+      return JSON.parse(cleanText);
+    } catch (error) {
+      console.error('Gemini Education Error:', error);
+      throw error;
+    }
+  }
+};

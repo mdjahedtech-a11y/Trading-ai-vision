@@ -1,0 +1,5 @@
+{
+  "name": "TradeSight AI",
+  "description": "AI-powered trading assistant with chart analysis and market insights",
+  "requestFramePermissions": ["camera"]
+}
