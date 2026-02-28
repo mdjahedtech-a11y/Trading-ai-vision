@@ -7,8 +7,8 @@ import { Language, AnalysisResult, PairAnalysisResult } from '../types';
 // to keep the API key secure, but for this requested architecture, we use client-side.
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-const MODEL_VISION = 'gemini-3-flash-preview'; // Optimized for multimodal understanding
-const MODEL_TEXT = 'gemini-3-flash-preview'; // Optimized for search grounding and speed
+const MODEL_VISION = 'gemini-2.5-flash'; // Stable multimodal model
+const MODEL_TEXT = 'gemini-2.5-flash'; // Stable text model with search
 
 export const GeminiService = {
   async analyzeChart(imageBase64: string, lang: Language): Promise<AnalysisResult> {
@@ -21,7 +21,7 @@ export const GeminiService = {
       const cleanBase64 = matches ? matches[2] : imageBase64;
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.0-flash-exp', // Use a model known for strong vision capabilities
+        model: MODEL_VISION,
         contents: {
           parts: [
             { inlineData: { mimeType: mimeType, data: cleanBase64 } },

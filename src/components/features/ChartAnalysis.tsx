@@ -23,8 +23,9 @@ export function ChartAnalysis() {
     try {
       const data = await GeminiService.analyzeChart(image, language);
       setResult(data);
-    } catch (err) {
-      setError('Failed to analyze chart. Please try again.');
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Failed to analyze chart. Please try again.');
     } finally {
       setLoading(false);
     }
