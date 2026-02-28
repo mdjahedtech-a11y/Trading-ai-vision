@@ -15,14 +15,16 @@ export const GeminiService = {
     try {
       const prompt = PROMPTS.chartAnalysis(lang);
       
-      // Remove header if present (data:image/png;base64,)
-      const cleanBase64 = imageBase64.split(',')[1] || imageBase64;
+      // Extract mime type and clean base64
+      const matches = imageBase64.match(/^data:(.+);base64,(.+)$/);
+      const mimeType = matches ? matches[1] : 'image/png'; // Default to png if not found
+      const cleanBase64 = matches ? matches[2] : imageBase64;
 
       const response = await ai.models.generateContent({
-        model: MODEL_VISION,
+        model: 'gemini-2.0-flash-exp', // Use a model known for strong vision capabilities
         contents: {
           parts: [
-            { inlineData: { mimeType: 'image/png', data: cleanBase64 } },
+            { inlineData: { mimeType: mimeType, data: cleanBase64 } },
             { text: prompt }
           ]
         },
