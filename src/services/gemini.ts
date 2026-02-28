@@ -7,8 +7,8 @@ import { Language, AnalysisResult, PairAnalysisResult } from '../types';
 // to keep the API key secure, but for this requested architecture, we use client-side.
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-const MODEL_VISION = 'gemini-2.5-flash-image'; // Optimized for vision
-const MODEL_TEXT = 'gemini-3.1-pro-preview'; // Optimized for complex reasoning
+const MODEL_VISION = 'gemini-3-flash-preview'; // Optimized for multimodal understanding
+const MODEL_TEXT = 'gemini-3-flash-preview'; // Optimized for search grounding and speed
 
 export const GeminiService = {
   async analyzeChart(imageBase64: string, lang: Language): Promise<AnalysisResult> {
